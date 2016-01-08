@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class ForecastFragment extends Fragment {
 
     private String[] forecastArray = {
             "Today-Sunny-88/63",
@@ -39,13 +38,13 @@ public class MainActivityFragment extends Fragment {
     private ArrayAdapter<String> mForecastAapter;
     private ListView listview_forecast;
 
-    public MainActivityFragment() {
+    public ForecastFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
 
         List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
 
@@ -110,7 +109,7 @@ public class MainActivityFragment extends Fragment {
 
 
         }  catch (IOException e) {
-            Log.e("MainActivityFragment","Error",e);
+            Log.e("ForecastFragment","Error",e);
             return null;
         }finally {
             if (urlConnection != null){
