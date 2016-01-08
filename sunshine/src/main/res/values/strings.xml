@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Sunshine</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    
+    <string-array name="forecast">
+        <item>Today-Sunny-88/63 </item>
+        <item>Tomorrow-Foggy-75/43</item>
+        <item>Friday-Cloudy-80/55</item>
+        <item>Saturday-Sunny-86/60</item>
+        <item>Sunday-Snowy-60/48</item>
+        <item>Monday-Foggy-77/56</item>
+    </string-array>
+</resources>
