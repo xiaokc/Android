@@ -5,13 +5,16 @@ import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -25,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -45,6 +49,7 @@ public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> mForecastAapter;
     private ListView listview_forecast;
+    private List<String> weekForecast;
 
     public ForecastFragment() {
     }
@@ -67,6 +72,14 @@ public class ForecastFragment extends Fragment {
 
         initData();
 
+        listview_forecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String forecastEntry = weekForecast.get(position);
+                Toast.makeText(getActivity(),position+"is clicked, forecastEntry is"+forecastEntry,Toast.LENGTH_LONG).show();
+            }
+        });
+
         return rootView;
     }
 
@@ -75,24 +88,20 @@ public class ForecastFragment extends Fragment {
     }
 
     private void initData() {
-        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
-
-
+        weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
         mForecastAapter = new ArrayAdapter<>(getActivity(),
                 R.layout.list_item_forecast, R.id.list_item_forecast_textview, weekForecast);
-
-
 
         listview_forecast.setAdapter(mForecastAapter);
     }
 
 
-    class FetchWeatherTask extends AsyncTask<String, Void, String> {
+    class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String[] doInBackground(String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -101,15 +110,11 @@ public class ForecastFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
 
-
             String query = params[0];
             String format = "json";
             String units = "metric";
             int numDays = 7;
             String appid = "b49b573ea5b0e5150417928348d05344";
-
-
-
 
             try {
                 final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily";
@@ -187,13 +192,43 @@ public class ForecastFragment extends Fragment {
                 }
             }
             Log.i(LOG_TAG, "forecast jsonStr=" + forecastJsonStr);
-            return forecastJsonStr;
+            try {
+                return WeatherDataHelper.getWeatherDataFromJson(forecastJsonStr, numDays);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "json exception:" + e.getMessage());
+            }
+            return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        protected void onPostExecute(String[] result) {
+            //my code here
+//            weekForecast = Arrays.asList(result);
+//            mForecastAapter = new ArrayAdapter<>(getActivity(),
+//                    R.layout.list_item_forecast, R.id.list_item_forecast_textview, weekForecast);
+//
+//            mForecastAapter.notifyDataSetChanged();
+//            listview_forecast.setAdapter(mForecastAapter);
+
+
+            //tutorial code  --- good method
+            if (result != null){
+                mForecastAapter.clear();
+//                for (String s : result){
+//                    mForecastAapter.add(s);
+//                }
+
+                //if the android target level is honeycomb(android 3.1) or above,
+                //the adapter can addAll, like this line code
+                mForecastAapter.addAll(result);
+            }
+
+            //new data is back from the server, Hooray~
+
+
         }
+
+
     }
 
     @Override
@@ -208,23 +243,8 @@ public class ForecastFragment extends Fragment {
         switch (id) {
             case R.id.action_refresh:
 //                Toast.makeText(getActivity(),"refresh",Toast.LENGTH_LONG).show();
-                new FetchWeatherTask(){
-                    @Override
-                    protected void onPostExecute(String s) {
-                        Log.i("xkc","s = "+s);
-                        try {
-                            String[] resultStr = WeatherDataHelper.getWeatherDataFromJson(s,7);
-                            List<String> forecastList = Arrays.asList(resultStr);
-                            ArrayAdapter adapter = new ArrayAdapter(getActivity(),
-                                    R.layout.list_item_forecast, R.id.list_item_forecast_textview,
-                                    forecastList);
-                            listview_forecast.setAdapter(adapter);
-                        } catch (JSONException e) {
-                           Log.e("xkc","json exception:"+e.getMessage());
-                        }
-
-                    }
-                }.execute("Beijing");
+                FetchWeatherTask task = new FetchWeatherTask();
+                task.execute("Beijing");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
