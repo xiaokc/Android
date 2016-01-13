@@ -15,6 +15,7 @@ import java.util.Locale;
  * Created by xkc on 1/8/16.
  */
 public class WeatherDataHelper {
+
     /**
      * The date/time conversion code is going to be moved outside the asynctask later,
      * so for convenience we're breaking it out into its own method now.
@@ -47,6 +48,9 @@ public class WeatherDataHelper {
      */
     public static String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
             throws JSONException {
+
+         final String LOG_TAG = "getWeatherDataFromJson()";
+
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_LIST = "list";
         final String OWM_TEMPERATURE = "temp";
@@ -84,11 +88,10 @@ public class WeatherDataHelper {
             // into something human-readable, since most people won't read "1400356800" as
             // "this saturday".
 
-            long time = dayForecast.getLong(OWM_DT);
-            Log.i("xkc","time="+time);
-            day = getReadableDateStr(time * 1000);
             // Cheating to convert this to UTC time, which is what we want anyhow
-
+            long time = dayForecast.getLong(OWM_DT);
+//            Log.i(LOG_TAG,"time="+time);
+            day = getReadableDateStr(time * 1000);
 
             JSONObject weather = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
             description = weather.getString(OWM_DESCRIPTION);
