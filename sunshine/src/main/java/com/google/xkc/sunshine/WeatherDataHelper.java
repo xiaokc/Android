@@ -1,5 +1,8 @@
 package com.google.xkc.sunshine;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -16,6 +19,10 @@ import java.util.Locale;
  */
 public class WeatherDataHelper {
 
+    protected static Context mContext;
+    private static final String LOG_TAG = "WeatherDataHelper";
+
+
     /**
      * The date/time conversion code is going to be moved outside the asynctask later,
      * so for convenience we're breaking it out into its own method now.
@@ -30,26 +37,33 @@ public class WeatherDataHelper {
     /**
      * Prepare the weather high/lows for presentation.
      */
-    public static String formatHighLows(double high, double low) {
+    public static String formatHighLows(double high, double low, String unitType) {
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundHigh = Math.round(high);
         long roundLow = Math.round(low);
+
+        if (unitType.equals(mContext.getString(R.string.pref_temperature_units_imperial))) {
+            roundHigh = (long) ((roundHigh * 1.8) + 32);
+            roundLow = (long) ((roundLow * 1.8) + 32);
+        } else if (!unitType.equals(mContext.getString(R.string.pref_temperature_units_metric))) {
+            Log.d(LOG_TAG, "Unit type not found: " + unitType);
+        }
 
         String highLowStr = roundHigh + "/" + roundLow;
         return highLowStr;
     }
 
     /**
-     * Take the String representing the complete forecast in JSON Format and
+     * Take the String representing the complete forec  ast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
-     * <p/>
+     * <p>
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
     public static String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
             throws JSONException {
 
-         final String LOG_TAG = "getWeatherDataFromJson()";
+        final String LOG_TAG = "getWeatherDataFromJson()";
 
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_LIST = "list";
@@ -76,6 +90,10 @@ public class WeatherDataHelper {
 
         String[] resultStrs = new String[numDays];
 
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String unitType = pref.getString(mContext.getString(R.string.pref_temperature_units_key),
+                mContext.getString(R.string.pref_temperature_units_metric));
+
         for (int i = 0; i < weatherArray.length(); i++) {
             // For now, using the format "Day, description, hi/low"
             String day;
@@ -100,7 +118,7 @@ public class WeatherDataHelper {
             JSONObject temperature = dayForecast.getJSONObject(OWM_TEMPERATURE);
             double high = temperature.getDouble(OWM_MAX);
             double low = temperature.getDouble(OWM_MIN);
-            highAndLow = formatHighLows(high, low);
+            highAndLow = formatHighLows(high, low, unitType);
 
             resultStrs[i] = day + "-" + description + "-" + highAndLow;
 
@@ -108,6 +126,27 @@ public class WeatherDataHelper {
         }
 
         return resultStrs;
+
+    }
+
+
+    /**
+     * parse the geo Location : longitude and latitude
+     * @param forecastJsonStr
+     * @return
+     */
+    public double[] getGeoLocation(String forecastJsonStr) throws JSONException {
+        double[] geoLocation = new double[2];
+        JSONObject forecastJson = new JSONObject(forecastJsonStr);
+        JSONObject coord = forecastJson.getJSONObject("coord");
+        double lon = coord.getDouble("lon");
+        double lat = coord.getDouble("lat");
+
+        geoLocation[0] = lon;
+        geoLocation[1] = lat;
+
+        return geoLocation;
+
 
     }
 
