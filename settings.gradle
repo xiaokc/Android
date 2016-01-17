@@ -1,1 +1,1 @@
-include ':app', ':sunshine'
+include ':app', ':sunshine', ':mytheater'
