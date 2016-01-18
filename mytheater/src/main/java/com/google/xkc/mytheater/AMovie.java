@@ -13,6 +13,16 @@ public class AMovie implements Serializable {
     private String vote_average;
     private String id;
 
+    private boolean favorite;
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
     public String getId() {
         return id;
     }
@@ -23,13 +33,14 @@ public class AMovie implements Serializable {
 
     public AMovie(String poster_path, String original_title,
                   String overview, String release_date, String vote_average,
-                  String id) {
+                  String id, boolean favorite) {
         this.poster_path = poster_path;
         this.original_title = original_title;
         this.overview = overview;
         this.release_date = release_date;
         this.vote_average = vote_average;
         this.id = id;
+        this.favorite = favorite;
     }
 
     public String getPoster_path() {
