@@ -16,6 +16,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".MyReveiver">
+            <intent-filter>
+                <action android:name="senz.intent.action.HOME_OFFICE_STATUS"/>
+                <action android:name="senz.intent.action.MOTION_CHANGED"/>
+                <action android:name="senz.intent.action.EVENT"/>
+
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
