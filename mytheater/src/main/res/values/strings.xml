@@ -20,4 +20,5 @@
     <string name="reviews">Reviews:</string>
 
     <string name="movie_detail">MovieDetail</string>
+    <string name="action_share">share</string>
 </resources>
