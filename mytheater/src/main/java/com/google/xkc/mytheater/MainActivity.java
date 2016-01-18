@@ -3,6 +3,7 @@ package com.google.xkc.mytheater;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -34,6 +35,9 @@ public class MainActivity extends Activity {
     private MovieListAdapter adapter;
     private Toolbar toolbar;
 
+    private DBManager dbManager;
+    private Cursor cursor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +51,7 @@ public class MainActivity extends Activity {
     }
 
     private void initEvent() {
+
         updateMovies();
 
     }
@@ -60,6 +65,10 @@ public class MainActivity extends Activity {
         toolbar.setTitleTextColor(getResources().getColor(R.color.text_white));
 
         movieList = new ArrayList<>();
+
+        dbManager = new DBManager(MainActivity.this);
+        adapter = new MovieListAdapter(MainActivity.this);
+
     }
 
     @Override
@@ -92,11 +101,61 @@ public class MainActivity extends Activity {
     }
 
     private void updateMovies() {
-        FetchMoviesTask task = new FetchMoviesTask();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String sortBy = preferences.getString(getString(R.string.pref_sort_by_key),
                 getString(R.string.pref_sort_by_default_value));
-        task.execute(sortBy);
+
+        movieList.clear();
+
+        //favorite movies are saved in local database
+        if (sortBy != null &&
+                sortBy.equalsIgnoreCase(getString(R.string.pref_sort_by_value_favorite))) {
+            cursor = dbManager.queryAllFavorites();
+            cursor.moveToFirst();
+            if (cursor != null && cursor.getCount() > 0) {
+                do {
+                    String id = cursor.getString(cursor.getColumnIndexOrThrow("id"));
+                    String poster_path = cursor.getString(cursor.getColumnIndexOrThrow("poster_path"));
+                    String original_title = cursor.getString(cursor.getColumnIndexOrThrow("original_title"));
+                    String overview = cursor.getString(cursor.getColumnIndexOrThrow("overview"));
+                    String release_date = cursor.getString(cursor.getColumnIndexOrThrow("release_date"));
+                    String vote_average = cursor.getString(cursor.getColumnIndexOrThrow("vote_average"));
+
+                    AMovie movie = new AMovie(
+                            poster_path, original_title, overview, release_date, vote_average, id, true);
+                    movieList.add(movie);
+                }while (cursor.moveToNext());
+                
+            }
+            cursor.close();
+            adapter.setList(movieList);
+            movie_list_rv.setAdapter(adapter);
+
+
+        } else {
+            FetchMoviesTask task = new FetchMoviesTask();
+            task.execute(sortBy);
+        }
+
+        adapter.setOnItemClickListener(new MovieListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                AMovie movie = movieList.get(position);
+
+                Intent detailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("movie", movie);
+                detailIntent.putExtras(bundle);
+                startActivity(detailIntent);
+            }
+
+            @Override
+            public void onItemLongClick(View v, int position) {
+
+            }
+        });
+
+
 
     }
 
@@ -174,29 +233,22 @@ public class MainActivity extends Activity {
         protected void onPostExecute(List<AMovie> result) {
             if (result != null) {
                 movieList = result;
-                adapter = new MovieListAdapter(MainActivity.this, movieList);
+                adapter.setList(movieList);
                 movie_list_rv.setAdapter(adapter);
-
-                adapter.setOnItemClickListener(new MovieListAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View v, int position) {
-                        AMovie movie = movieList.get(position);
-
-                        Intent detailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("movie",movie);
-                        detailIntent.putExtras(bundle);
-                        startActivity(detailIntent);
-                    }
-
-                    @Override
-                    public void onItemLongClick(View v, int position) {
-
-                    }
-                });
 
             }
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateMovies();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
 }
