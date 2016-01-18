@@ -5,10 +5,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -30,7 +35,7 @@ import java.util.List;
 /**
  * Created by xkc on 1/15/16.
  */
-public class MovieDetailActivity extends Activity implements View.OnClickListener {
+public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener {
     private final String LOG_TAG = this.getClass().getSimpleName();
     private Toolbar toolbar;
 
@@ -90,6 +95,12 @@ public class MovieDetailActivity extends Activity implements View.OnClickListene
     }
 
     private void initEvent() {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
+
         Intent intent = getIntent();
 
         Bundle bundle = intent.getExtras();
@@ -106,9 +117,9 @@ public class MovieDetailActivity extends Activity implements View.OnClickListene
         if (Service.hasNetwork(this)) {
             FetchMovieDetailsTask task = new FetchMovieDetailsTask();
             task.execute(id);
-        }else {
+        } else {
             Toast.makeText(this, "Network error", Toast.LENGTH_LONG).show();
-            Log.e(LOG_TAG,"Network error");
+            Log.e(LOG_TAG, "Network error");
         }
 
     }
@@ -269,5 +280,33 @@ public class MovieDetailActivity extends Activity implements View.OnClickListene
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_movie_detail, menu);
+        MenuItem item = menu.findItem(R.id.action_share);
+        ShareActionProvider mShareActionProvider =
+                (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(createShareIntent());
+        } else {
+            Log.e(LOG_TAG, "ShareActionProvider is null ? ");
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
 
+
+    private Intent createShareIntent() {
+        //App uses a share Intent to expose the external youtube URL for the trailer
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        if (trailerList != null && trailerList.size() > 0){
+            ATrailer trailer = trailerList.get(0);
+            String youtubeUrl = String.format("http://www.youtube.com/watch?v=%1$s", trailer.getId());
+            intent.putExtra(Intent.EXTRA_TEXT, youtubeUrl);
+        }else {
+            intent.putExtra(Intent.EXTRA_TEXT,movie.getPoster_path());
+        }
+        return intent;
+    }
 }
