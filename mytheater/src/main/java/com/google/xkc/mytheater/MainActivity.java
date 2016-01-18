@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
                             poster_path, original_title, overview, release_date, vote_average, id, true);
                     movieList.add(movie);
                 }while (cursor.moveToNext());
-                
+
             }
             cursor.close();
             adapter.setList(movieList);

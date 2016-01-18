@@ -8,7 +8,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="3"
         android:layout_margin="20dp"
         android:orientation="horizontal">
 
@@ -39,6 +40,7 @@
 
             <TextView
                 android:id="@+id/user_rating_tv"
+                android:text="user_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -48,6 +50,7 @@
 
             <TextView
                 android:id="@+id/release_date_tv"
+                android:text="release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -55,13 +58,23 @@
                 android:layout_below="@id/user_rating_tv"
                 android:layout_marginRight="10dp" />
 
+            <ImageButton
+                android:id="@+id/favorite_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_favorite_1"
+                android:layout_below="@id/release_date_tv"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp"/>
+
         </RelativeLayout>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp">
 
@@ -74,7 +87,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="2"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:orientation="vertical">
@@ -94,27 +108,33 @@
             android:id="@+id/movie_trailers_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <LinearLayout
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+        <View
             android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dark_gray" />
+        <TextView
+
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
+            android:text="@string/reviews" />
 
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/reviews" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/dark_gray" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/movie_reviews_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/movie_reviews_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

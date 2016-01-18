@@ -10,9 +10,11 @@
 
     <string name="pref_sort_by_option_popularity">popularity</string>
     <string name="pref_sort_by_option_vote_average">vote_average</string>
+    <string name="pref_sort_by_option_favorite">favorite</string>
 
     <string name="pref_sort_by_value_popularity">popularity.desc</string>
     <string name="pref_sort_by_value_vote_average">vote_average.desc</string>
+    <string name="pref_sort_by_value_favorite">favorite</string>
 
     <string name="trailers">Trailers:</string>
     <string name="reviews">Reviews:</string>

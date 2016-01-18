@@ -42,7 +42,7 @@ public class MovieDataHelper {
                 String release_date = aMovie.getString("release_date");
 
                 AMovie movie = new AMovie(POSTER_BASE_PATH + POSTER_SIZE + poster_path,
-                        original_title,overview,release_date,vote_average,id);
+                        original_title,overview,release_date,vote_average,id,false);
 
                movieList.add(movie);
 
@@ -62,7 +62,7 @@ public class MovieDataHelper {
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
             if (jsonObject.has("videos")) {
-                Log.i(LOG_TAG,"has videos");
+//                Log.i(LOG_TAG,"has videos");
                 JSONObject videos = jsonObject.getJSONObject("videos");
                 JSONArray results = videos.getJSONArray("results");
 

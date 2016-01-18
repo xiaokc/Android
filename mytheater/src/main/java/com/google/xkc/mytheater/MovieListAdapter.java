@@ -32,11 +32,15 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
         this.mListener = listener;
     }
 
-    public MovieListAdapter(Context context, List<AMovie> list){
+    public MovieListAdapter(Context context ){
         this.mContext = context;
         this.mInflater = LayoutInflater.from(context);
-        this.mList = list;
 
+
+    }
+
+    public void setList(List<AMovie> list){
+        this.mList = list;
     }
 
     @Override
