@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -102,8 +103,13 @@ public class MovieDetailActivity extends Activity implements View.OnClickListene
 
     private void showTrailersAndReviews(AMovie movie) {
         String id = movie.getId();
-        FetchMovieDetailsTask task = new FetchMovieDetailsTask();
-        task.execute(id);
+        if (Service.hasNetwork(this)) {
+            FetchMovieDetailsTask task = new FetchMovieDetailsTask();
+            task.execute(id);
+        }else {
+            Toast.makeText(this, "Network error", Toast.LENGTH_LONG).show();
+            Log.e(LOG_TAG,"Network error");
+        }
 
     }
 

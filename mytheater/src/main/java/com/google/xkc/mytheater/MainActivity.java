@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -124,7 +125,7 @@ public class MainActivity extends Activity {
                     AMovie movie = new AMovie(
                             poster_path, original_title, overview, release_date, vote_average, id, true);
                     movieList.add(movie);
-                }while (cursor.moveToNext());
+                } while (cursor.moveToNext());
 
             }
             cursor.close();
@@ -133,8 +134,13 @@ public class MainActivity extends Activity {
 
 
         } else {
-            FetchMoviesTask task = new FetchMoviesTask();
-            task.execute(sortBy);
+            if (Service.hasNetwork(this)) {
+                FetchMoviesTask task = new FetchMoviesTask();
+                task.execute(sortBy);
+            }else {
+                Toast.makeText(this,"Network error",Toast.LENGTH_LONG).show();
+                Log.e(LOG_TAG,"Network error");
+            }
         }
 
         adapter.setOnItemClickListener(new MovieListAdapter.OnItemClickListener() {
@@ -154,7 +160,6 @@ public class MainActivity extends Activity {
 
             }
         });
-
 
 
     }
