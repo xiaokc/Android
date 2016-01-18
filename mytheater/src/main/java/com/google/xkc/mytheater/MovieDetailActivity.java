@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,14 +23,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by xkc on 1/15/16.
  */
-public class MovieDetailActivity extends Activity {
+public class MovieDetailActivity extends Activity implements View.OnClickListener {
     private final String LOG_TAG = this.getClass().getSimpleName();
     private Toolbar toolbar;
+
+    private AMovie movie;
 
     private ImageView poster_thumbnail_iv;
     private TextView original_title_tv;
@@ -43,6 +48,10 @@ public class MovieDetailActivity extends Activity {
     private RecyclerView movie_reviews_rv;
     private List<AReview> reviewList;
     private ReviewListAdapter reviewListAdapter;
+
+    private ImageButton favorite_btn;
+    private boolean isFavorite;
+    private DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +74,17 @@ public class MovieDetailActivity extends Activity {
 
         movie_trailers_rv = (RecyclerView) findViewById(R.id.movie_trailers_rv);
         movie_trailers_rv.setLayoutManager(
-                new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         movie_reviews_rv = (RecyclerView) findViewById(R.id.movie_reviews_rv);
-        movie_reviews_rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
+        movie_reviews_rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         toolbar.setTitle(getString(R.string.movie_detail));
         toolbar.setTitleTextColor(getResources().getColor(R.color.text_white));
+
+        favorite_btn = (ImageButton) findViewById(R.id.favorite_btn);
+
+        dbManager = new DBManager(MovieDetailActivity.this);
 
     }
 
@@ -79,11 +92,12 @@ public class MovieDetailActivity extends Activity {
         Intent intent = getIntent();
 
         Bundle bundle = intent.getExtras();
-        AMovie movie = (AMovie) bundle.getSerializable("movie");
+        movie = (AMovie) bundle.getSerializable("movie");
 
         showMovieDetail(movie);
-
         showTrailersAndReviews(movie);
+
+        favorite_btn.setOnClickListener(this);
     }
 
     private void showTrailersAndReviews(AMovie movie) {
@@ -99,16 +113,53 @@ public class MovieDetailActivity extends Activity {
         String user_rating = movie.getVote_average();
         String release_date = movie.getRelease_date();
         String overview = movie.getOverview();
+        isFavorite = movie.isFavorite() || dbManager.isExist(movie);
 
         Picasso.with(this).load(poster_path).into(poster_thumbnail_iv);
         original_title_tv.setText(original_title);
         user_rating_tv.setText(user_rating);
         release_date_tv.setText(release_date);
         overview_tv.setText(overview);
+
+        favorite_btn.setBackground(isFavorite
+                ? getResources().getDrawable(R.drawable.ic_favorite_2)
+                : getResources().getDrawable(R.drawable.ic_favorite_1));
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.favorite_btn:
+                //allow users to mark a movie as a favorite in the details view
+                // by tapping a button(star).
+                // This is for a local movies collection that
+                // you will maintain and does not require an API request*.
+
+                movie.setFavorite(!movie.isFavorite());
+                isFavorite = movie.isFavorite();
+                favorite_btn.setBackground(isFavorite
+                        ? getResources().getDrawable(R.drawable.ic_favorite_2)
+                        : getResources().getDrawable(R.drawable.ic_favorite_1));
+
+                boolean isExist = dbManager.isExist(movie);
+                if (isFavorite) {
+                    if (!isExist) {
+                        Log.i(LOG_TAG, "movie is not exist");
+                        dbManager.addOneMovie(movie);
+                    }
+                } else {
+                    if (isExist) {
+                        dbManager.deleteOneMovie(movie);
+                    }
+                }
+                break;
+        }
+
     }
 
 
-    class FetchMovieDetailsTask extends AsyncTask<String,Void,String>{
+    class FetchMovieDetailsTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -124,10 +175,10 @@ public class MovieDetailActivity extends Activity {
 
             Uri builtUri = Uri.parse(URLSTR).buildUpon()
                     .appendQueryParameter(API_KEY, Const.THE_MOVIE_DB_APIKEY)
-                    .appendQueryParameter(APPEND_TO_RESPONSE,"videos".concat(",").concat("reviews"))
+                    .appendQueryParameter(APPEND_TO_RESPONSE, "videos".concat(",").concat("reviews"))
                     .build();
 
-            Log.i(LOG_TAG,"builtUri="+builtUri);
+//            Log.i(LOG_TAG, "builtUri=" + builtUri);
 
             try {
                 URL url = new URL(builtUri.toString());
@@ -136,37 +187,37 @@ public class MovieDetailActivity extends Activity {
                 connection.connect();
 
                 InputStream inputStream = connection.getInputStream();
-                if (inputStream == null){
+                if (inputStream == null) {
                     return null;
-                }else {
+                } else {
                     reader = new BufferedReader(new InputStreamReader(inputStream));
                     StringBuilder builder = new StringBuilder();
                     String line = "";
-                    while ((line = reader.readLine()) != null){
+                    while ((line = reader.readLine()) != null) {
                         builder.append(line + "\n");
                     }
 
-                    if (builder.length() <= 0){
+                    if (builder.length() <= 0) {
                         return null;
-                    }else {
+                    } else {
                         detailsStr = builder.toString();
                     }
                 }
 
-                Log.i(LOG_TAG,"detailsStr: "+detailsStr);
+                Log.i(LOG_TAG, "detailsStr: " + detailsStr);
 
 
-            }  catch (IOException e) {
-                Log.e(LOG_TAG,"io exception: "+e.getMessage());
-            }finally {
-                if (connection != null){
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "io exception: " + e.getMessage());
+            } finally {
+                if (connection != null) {
                     connection.disconnect();
                 }
-                if (reader != null){
+                if (reader != null) {
                     try {
                         reader.close();
                     } catch (IOException e) {
-                        Log.e(LOG_TAG,"BufferReader close failed: "+e.getMessage());
+                        Log.e(LOG_TAG, "BufferReader close failed: " + e.getMessage());
                     }
                 }
             }
@@ -185,7 +236,7 @@ public class MovieDetailActivity extends Activity {
 
 
             trailerList = MovieDataHelper.getTrailerListFromJsonStr(result);
-            trailerListAdapter = new TrailerListAdapter(MovieDetailActivity.this,trailerList);
+            trailerListAdapter = new TrailerListAdapter(MovieDetailActivity.this, trailerList);
             movie_trailers_rv.setAdapter(trailerListAdapter);
 
 
@@ -194,9 +245,13 @@ public class MovieDetailActivity extends Activity {
                 public void onItemClick(View v, int pos) {
                     ATrailer trailer = trailerList.get(pos);
                     String trailerUrl = String.format("http://www.youtube.com/watch?v=%1$s", trailer.getId());
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(trailerUrl));
-                    startActivity(intent);
+                    if (trailer.getSite().equalsIgnoreCase("YouTube")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(trailerUrl));
+                        startActivity(intent);
+                    } else {
+                        throw new UnsupportedOperationException("Only YouTube is supported!");
+                    }
                 }
 
                 @Override
