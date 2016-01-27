@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.UserDictionary;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +17,57 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(LOG_TAG,"===>onCreate() is called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(LOG_TAG,"===>onStart() is called");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(LOG_TAG,"===>onResume() is called");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(LOG_TAG,"===>onPause() is called");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i(LOG_TAG,"===>onStop() is called");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(LOG_TAG,"===>onDestroy() is called");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.i(LOG_TAG,"===>onRestart() is called");
+        super.onRestart();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

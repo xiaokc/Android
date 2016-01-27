@@ -25,4 +25,6 @@ dependencies {
     compile 'io.petchat:senzsdk:2.0.16'
     compile 'com.wilddog:wilddog-client-android:0.5.2'
     compile 'com.github.zishell:MotionClassifyLib:v1.0.5'
+
+    //compile 'jp.wasabeef:richeditor-android:1.1.0'
 }
