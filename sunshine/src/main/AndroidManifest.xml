@@ -44,6 +44,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <provider
+            android:authorities="com.google.xkc.sunshine"
+            android:name=".WeatherProvider"
+            />
     </application>
 
 </manifest>
